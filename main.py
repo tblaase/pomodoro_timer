@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.constants import DISABLED, NORMAL
+import math
 
 # ---------------------------- CONSTANTS ------------------------------- #
 PINK = "#e2979c"
@@ -13,10 +14,59 @@ SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 
 # ---------------------------- TIMER RESET ------------------------------- #
+def reset_timer():
+    global reps, timer
+    window.after_cancel(timer)
+    canvas.itemconfig(timer_text, text="00:00")
+    reset_button.config(state=DISABLED)
+    start_button.config(state=NORMAL)
+    title_label.config(text="Timer", fg=GREEN)
+    check_marks.config(text="")
+    reps = 0
 
 # ---------------------------- TIMER MECHANISM ------------------------------- #
+def start_timer():
+    start_button.config(state=DISABLED)
+    reset_button.config(state=NORMAL)
+    global reps
+    reps +=1
+
+    work_secs = WORK_MIN * 60
+    short_break_secs = SHORT_BREAK_MIN * 60
+    long_break_secs = LONG_BREAK_MIN * 60
+
+    if reps % 8 == 0:
+        count_down(long_break_secs)
+        title_label.config(text="Break", fg=RED)
+    elif reps % 2 == 0:
+        count_down(short_break_secs)
+        title_label.config(text="Break", fg=PINK)
+    else:
+        count_down(work_secs)
+        title_label.config(text="Work", fg=GREEN)
 
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
+def count_down(count):
+    global reps, timer
+    # hours is not really needed here, but could easily be implemented
+    #hours, remainder = divmod(int(count), 3600)
+    minutes,seconds = divmod(int(count), 60)
+
+    #display_time = ('0' + str(hours) + ':' if 10 > hours > 0 else (str(hours) + ':' if hours > 9 else ''))
+    display_time = (f"0{minutes}:" if 10 > minutes >= 0 else f"{minutes}:")
+    display_time += (f"0{seconds}" if 10 > seconds >= 0 else str(seconds))
+
+    canvas.itemconfig(timer_text, text=display_time)
+    if count > 0:
+        timer = window.after(1000, count_down, count - 1)
+        print(timer)
+    else:
+        start_timer()
+        marks = ""
+        work_sessions = math.floor(reps/2)
+        for _ in range(work_sessions):
+            marks += "✓"
+        check_marks.config(text=marks)
 
 # ---------------------------- SET THEME ------------------------------- #
 
