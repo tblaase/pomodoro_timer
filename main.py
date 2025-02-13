@@ -1,6 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.constants import DISABLED, NORMAL
+
+import sv_ttk
+import darkdetect
+import pywinstyles, sys
+import platform
 import math
 
 # ---------------------------- CONSTANTS ------------------------------- #
@@ -12,6 +17,8 @@ FONT_NAME = "Courier"
 WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
+OS = platform.system().lower()
+THEME = darkdetect.theme().lower()
 
 # ---------------------------- TIMER RESET ------------------------------- #
 def reset_timer():
@@ -69,6 +76,23 @@ def count_down(count):
         check_marks.config(text=marks)
 
 # ---------------------------- SET THEME ------------------------------- #
+def apply_theme_to_titlebar(root):
+    if OS == 'windows':
+        version = sys.getwindowsversion()
+
+        if version.major == 10 and version.build >= 22000:
+            # Set the title bar color to the background color on Windows 11 for better appearance
+            pywinstyles.change_header_color(root, "#1c1c1c" if THEME == "dark" else "#fafafa")
+        elif version.major == 10:
+            pywinstyles.apply_style(root, "dark" if THEME == "dark" else "normal")
+
+            # A hacky way to update the title bar's color on Windows 10 (it doesn't update instantly like on Windows 11)
+            root.wm_attributes("-alpha", 0.99)
+            root.wm_attributes("-alpha", 1)
+    elif OS =='linux':
+        print("theme not implemented for Linux")
+    else:
+        print("theme not implemented for MacOS")
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = tk.Tk()
@@ -92,6 +116,11 @@ reset_button.grid(column=2, row=2)
 check_marks = tk.Label(fg=GREEN, bg=YELLOW, font=(FONT_NAME,20))
 check_marks.grid(column=1, row=3)
 
+apply_theme_to_titlebar(window)
+sv_ttk.set_theme("light")
 
 # global variables
+reps = 0
+timer = ""
+
 window.mainloop()
